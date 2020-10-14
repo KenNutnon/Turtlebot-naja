@@ -36,6 +36,7 @@ class Follower:
     img_size = (img.shape[1], img.shape[0])
     image = cv2.warpPerspective(img,M,(img_size[0]+100,img_size[1]+100))#img_size
     
+    # masking color (white and yellow) - me
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     lower_yellow = numpy.array([ 10,  10,  10])
     upper_yellow = numpy.array([255, 255, 250])
@@ -43,16 +44,17 @@ class Follower:
     lower_white = numpy.array([100,100,200], dtype= "uint8")
     upper_white = numpy.array([255,255,255], dtype= "uint8")
 
-    #threshold to get only white
+    #threshold to get only white (and yellow - me)
     maskw = cv2.inRange(image, lower_white, upper_white)
     masky = cv2.inRange(hsv, lower_yellow, upper_yellow)
     #remove pixels not in this range
-    mask_yw = cv2.bitwise_or(maskw, masky)    
-    rgb_yw = cv2.bitwise_and(image, image, mask = mask_yw).astype(numpy.uint8)
+    mask_yw = cv2.bitwise_or(maskw, masky)                                      # to combine the white and yellow mask - me
+    rgb_yw = cv2.bitwise_and(image, image, mask = mask_yw).astype(numpy.uint8)  # mask rgb img with mask_yw
 
-    rgb_yw = cv2.cvtColor(rgb_yw, cv2.COLOR_RGB2GRAY)
+    rgb_yw = cv2.cvtColor(rgb_yw, cv2.COLOR_RGB2GRAY) #RGB > GRAY - me
  
-    #filter mask
+    #filter mask (deleting noise out/in  - me)
+    #rgb_yw2 is a gray rgb(probably idk) with filtered mask - me
     kernel = numpy.ones((7,7), numpy.uint8)
     opening = cv2.morphologyEx(rgb_yw, cv2.MORPH_OPEN, kernel)
     rgb_yw2 = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)		
@@ -60,10 +62,13 @@ class Follower:
     h, w= rgb_yw2.shape
     search_top = 7*h/8+20
     search_bot = 7*h/8 + 800 +20
+    #deleting the top and the bottom
     rgb_yw2[0:search_top, 0:w] = 0
     rgb_yw2[search_bot:h, 0:w] = 0
     M = cv2.moments(rgb_yw2)
     c_time = rospy.Time.now()
+
+    #M['m00'] area of the mask (if there is no area mean no line is found so it send to else which rotate around)
     if M['m00'] > 0:
       cxm = int(M['m10']/M['m00'])
       cym = int(M['m01']/M['m00'])
@@ -72,8 +77,9 @@ class Follower:
       if cxm <= 2*h/8:
       	cx = cxm +(h/2)
       
-      cv2.circle(rgb_yw2, (cxm, cym), 20, (255,0,0), -1)
-      cv2.circle(rgb_yw2, (cx, cym), 20, (255,0,0),-1)
+      #Drawing circle at the Centroid with r = 20 filled with blue - me
+      cv2.circle(rgb_yw2, (cxm, cym), 20, (255,0,0), 2)
+      cv2.circle(rgb_yw2, (cx, cym), 20, (255,0,0), 2)
   
       # BEGIN CONTROL
       err = cx - 4*w/8
@@ -93,7 +99,10 @@ class Follower:
 
       # END CONTROL
 
-    cv2.imshow("win3", rgb_yw2)
+    cv2.imshow("rgb_yw2", rgb_yw2)
+    cv2.imshow("rgb_yw", rgb_yw)
+    # cv2.imshow("mask_yw", mask_yw)
+    cv2.imshow("image", image)
     cv2.waitKey(3)
 
 rospy.init_node('follower')
