@@ -30,8 +30,8 @@ class Follower:
     img = cv2.resize(image0,None,fx=0.6, fy=0.6, interpolation = cv2.INTER_CUBIC)
     #print img.shape
     rows, cols, ch = img.shape
-    pts1 = numpy.float32([[90,122],[313,122],[35,242],[385,242]])
-    pts2 = numpy.float32([[0,0],[400,0],[0,400],[400,400]])
+		pts1 = numpy.float32([[105,200],[275,200],[8,265],[375,265]])
+		pts2 = numpy.float32([[0,0],[400,0],[0,400],[400,400]])
     M = cv2.getPerspectiveTransform(pts1,pts2)
     img_size = (img.shape[1], img.shape[0])
     image = cv2.warpPerspective(img,M,(img_size[0]+100,img_size[1]+100))#img_size
@@ -59,6 +59,7 @@ class Follower:
     opening = cv2.morphologyEx(rgb_yw, cv2.MORPH_OPEN, kernel)
     rgb_yw2 = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)		
 	
+		#where shit get fucked
     h, w= rgb_yw2.shape
     search_top = 7*h/8+20
     search_bot = 7*h/8 + 800 +20
