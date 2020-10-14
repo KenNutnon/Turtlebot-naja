@@ -38,7 +38,7 @@ class Follower:
     
     # masking color (white and yellow) - me
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    lower_yellow = numpy.array([ 10,  10,  10])
+    lower_yellow = numpy.array([27, 10, 50])
     upper_yellow = numpy.array([255, 255, 250])
 
     lower_white = numpy.array([100,100,200], dtype= "uint8")
