@@ -1,0 +1,6 @@
+import cv2
+import numpy as np
+
+rgb = np.uint8([[[18,153,142]]])
+hsv = cv2.cvtColor(green,cv2.COLOR_BGR2HSV)
+print hsv_green
